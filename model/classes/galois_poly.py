@@ -9,24 +9,28 @@ class GaloisPoly:
         self._degree    = self._get_poly_degree(self._coeff)
 
     def __call__(self, x):
-        # manage zero poly
+        # manage zero poly, zero x
         if self._zero_poly:
             ans = 0
+        elif x == ELEMENT_ZERO:
+            ans = self._coeff[::-1][0]
         else:
             for k, ak in enumerate(self._coeff[::-1]):
                 if k == 0:
-                    ans = self._coeff[0]
+                    ans = self._coeff[::-1][0]
                 elif ak != ELEMENT_ZERO:
                     # compute powers, multiply by ak, add all
                     x_pow   = self._gf.pow(x, k)[ID_POWER]
+                    # print(f"x_pow = self._gf.pow({x}, {k})[ID_POWER] == {x_pow}")
                     term    = self._gf.mul(ak, x_pow)[ID_POWER]
+                    # print(f"term = self._gf.mul({ak}, {x_pow})[ID_POWER] == {term}")
                     ans     = self._gf.add(term, ans)[ID_POWER]
+                    # print(f"ans = self._gf.add({term}, {ans})[ID_POWER] == {ans}")
 
         return ans
 
     def __str__(self):
-        info = "p(x) == "
-
+        info = ""
         # manage zero poly
         if self._zero_poly:
             info += "[0]"
@@ -114,6 +118,10 @@ class GaloisPoly:
             _, r    = self._div_poly(self._coeff, other._coeff)
             r       = GaloisPoly(self._gf, r)
         return r
+
+    def __matmul__(self, other):
+        ak  = self._coeff[::-1][other]
+        return ak
 
 # =======================================================================================
 # =======================================================================================
