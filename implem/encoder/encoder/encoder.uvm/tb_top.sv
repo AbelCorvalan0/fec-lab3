@@ -18,17 +18,21 @@ module tb_top;
         .i_clock( i_clock )
     );
 
-    bch_15_5_encoder #(
-        .NB_WORD        ( NB_WORD           ),
-        .NB_CODEWORD    ( NB_CODEWORD       ))
-    dut (
-        .i_word         ( vif.i_word        ),
-        .i_valid        ( vif.i_valid       ),
-        .i_reset        ( vif.i_reset       ),
-        .i_clock        ( vif.i_clock       ),
-        .o_codeword     ( vif.o_codeword    ),
-        .o_valid        ( vif.o_valid       )
-    );
+    assign vif.o_codeword = vif.i_word;
+    assign vif.o_valid    = vif.i_valid;
+
+
+    // bch_15_5_encoder #(
+    //     .NB_WORD        ( NB_WORD           ),
+    //     .NB_CODEWORD    ( NB_CODEWORD       ))
+    // dut (
+    //     .i_word         ( vif.i_word        ),
+    //     .i_valid        ( vif.i_valid       ),
+    //     .i_reset        ( vif.i_reset       ),
+    //     .i_clock        ( vif.i_clock       ),
+    //     .o_codeword     ( vif.o_codeword    ),
+    //     .o_valid        ( vif.o_valid       )
+    // );
 
     initial begin
         uvm_config_db#(virtual dut_if)::set(null, "*", "vif", vif);
