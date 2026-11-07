@@ -1,5 +1,5 @@
 import numpy as np
-from .defs import *
+from classes.defs import *
 
 class GaloisPoly:
     def __init__(self, gf, p):
