@@ -2,13 +2,30 @@ import numpy as np
 from classes.defs import *
 
 class GaloisPoly:
+    
     def __init__(self, gf, p):
+        """
+        Implements a polynomial over GF
+
+        Args:
+            gf: Given GF where the coefficient lives
+            p: List of coefficient alpha powers, in decending power order
+        """
         self._gf        = gf
         self._zero_poly = False
         self._coeff     = self._remove_lead_zeros(p)
         self._degree    = self._get_poly_degree(self._coeff)
 
     def __call__(self, x):
+        """
+        Evaluates a poly in a given element x as poly(x)
+
+        Args:
+            x: Power of element to valuate
+
+        Returns:
+            int: Result of valuation
+        """
         # manage zero poly, zero x
         if self._zero_poly:
             ans = 0
@@ -55,6 +72,12 @@ class GaloisPoly:
         return str(self._coeff)
 
     def __add__(self, other):
+        """
+        Get the addition f plus g as f + g
+
+        Returns:
+            GaloisPoly: Result of addition
+        """
         # manage zero poly
         if self._zero_poly:
             ans = self
@@ -66,6 +89,12 @@ class GaloisPoly:
         return ans
 
     def __mul__(self, other):
+        """
+        Get the multiplication/scale f by g as f * g (if g is constant scale is made)
+
+        Returns:
+            GaloisPoly: Result of multiplication/scale
+        """
         if isinstance(other, int):
             # manage zero poly
             if self._zero_poly:
@@ -85,6 +114,15 @@ class GaloisPoly:
         return ans
 
     def __truediv__(self, other):
+        """
+        Get the quotient and reminder of the f over g division as f / g
+
+        Raises:
+            ZeroDivisionError: Divisor is the zero-poly
+
+        Returns:
+            tuple: (quotient, remainder)
+        """
         # manage zero poly
         if other._zero_poly:
             raise ZeroDivisionError("ArithmeticError: Divisor Must Not Be Zero Poly")
@@ -98,6 +136,15 @@ class GaloisPoly:
         return q, r
 
     def __floordiv__(self, other):
+        """
+        Get the quotient of the f over g division as f // g
+
+        Raises:
+            ZeroDivisionError: Divisor is the zero-poly
+
+        Returns:
+            GaloisPoly: Quotient of division
+        """
         # manage zero poly
         if other._zero_poly:
             raise ZeroDivisionError("ArithmeticError: Divisor Must Not Be Zero Poly")
@@ -109,6 +156,15 @@ class GaloisPoly:
         return q
 
     def __mod__(self, other):
+        """
+        Get the remainder of the f over g division as f % g
+
+        Raises:
+            ZeroDivisionError: Divisor is the zero-poly
+
+        Returns:
+            GaloisPoly: Remainder of division
+        """
         # manage zero poly
         if other._zero_poly:
             raise ZeroDivisionError("ArithmeticError: Divisor Must Not Be Zero Poly")
@@ -120,12 +176,27 @@ class GaloisPoly:
         return r
 
     def __matmul__(self, other):
+        """
+        Get ak coefficient as poly @ k
+
+        Returns:
+            int: Field element ak
+        """
         ak  = self._coeff[::-1][other]
         return ak
 
 # =======================================================================================
 # =======================================================================================
     def _remove_lead_zeros(self, p):
+        """
+        Removes leading zeros of a given coefficient list, if any
+
+        Args:
+            p: Coefficient list of p
+
+        Returns:
+            list: Coefficient list with no leading zeros
+        """
         # manage zero poly, pass as p = [ELEMENT_ZERO]
         if np.all(np.array(p) == ELEMENT_ZERO):
             self._zero_poly = True
@@ -142,6 +213,15 @@ class GaloisPoly:
         return p[first_non_zero:]
         
     def _get_poly_degree(self, p):
+        """
+        Get the degree of poly for the given coefficient list
+
+        Args:
+            p: Coefficient list of p
+
+        Returns:
+            int: Degree of represented poly
+        """
         if np.all(np.array(p) == ELEMENT_ZERO):
             degree = 0
         else:
@@ -149,6 +229,16 @@ class GaloisPoly:
         return degree
 
     def _align_terms(self, f, g):
+        """
+        Completes with zero f and g polynomials to align powers
+
+        Args:
+            f: Coefficient list of f
+            g: Coefficient list of g
+
+        Returns:
+            tuple: Lists with aligned f and g powers (f,g)
+        """
         diff = self._get_poly_degree(f) - self._get_poly_degree(g)
         if diff > 0:
             g   = [ELEMENT_ZERO]*diff + g
@@ -158,6 +248,16 @@ class GaloisPoly:
         return f, g
 
     def _scale_poly(self, p, alpha):
+        """
+        Get the coefficient list of scaling p by element alpha
+
+        Args:
+            p: Coefficient list of p
+            alpha: Power of alpha element
+
+        Returns:
+            list: Coefficient list of the scaled poly
+        """
         ans = p.copy()
         for i, ak in enumerate(p):
             if ak != ELEMENT_ZERO:
@@ -165,6 +265,15 @@ class GaloisPoly:
         return ans
     
     def _add_terms(self, term_stack):
+        """
+        Implement the coefficient summation of several polynomals over GF
+
+        Args:
+            term_stack: List stack (2D-matrix). Each row is the coefficients of a poly aligned by powers
+
+        Returns:
+            list: Coefficients of the summation in format index == power
+        """
         term_stack = np.atleast_2d(term_stack)
         term, power = term_stack.shape
 
@@ -179,6 +288,16 @@ class GaloisPoly:
         return ans
 
     def _add_poly(self, f, g):
+        """
+        Get the coefficient list of f+g addition
+
+        Args:
+            f: Coefficient list of f
+            g: Coefficient list of g
+
+        Returns:
+            list: Coefficient list of the addition
+        """
         # complete poly terms
         f, g = self._align_terms(f, g)
 
@@ -189,6 +308,16 @@ class GaloisPoly:
         return ans
 
     def _mul_poly(self, f, g):
+        """
+        Get the coefficient list of f*g multiplication
+
+        Args:
+            f: Coefficient list of f
+            g: Coefficient list of g
+
+        Returns:
+            list: Coefficient list of the multiplication
+        """
         f_degree = self._get_poly_degree(f)
         g_degree = self._get_poly_degree(g)
 
@@ -215,9 +344,22 @@ class GaloisPoly:
         return ans
 
     def _div_poly(self, f, g):
+        """
+        Get the coefficient list of f/g division
+
+        Args:
+            f: Coefficient list of f
+            g: Coefficient list of g
+
+        Raises:
+            ArithmeticError: The given lists represents polinomials with degree of f less than degree of g
+
+        Returns:
+            list: Coefficient list of the division
+        """
         diff = self._get_poly_degree(f) - self._get_poly_degree(g)
         if diff < 0:
-            raise ValueError("ArithmeticError: Degree of f must >= to degree of g")
+            raise ArithmeticError("ArithmeticError: Degree of f must >= to degree of g")
         else:
             step    = f
             q       = None
@@ -242,6 +384,15 @@ class GaloisPoly:
 # =======================================================================================
 # =======================================================================================
     def poly_from_roots(self, roots):
+        """
+        Get a polynom with specified roots
+
+        Args:
+            roots: List with alpha powers of desired roots
+
+        Returns:
+            GaloisPoly: Polynom with corresponding roots
+        """
         if len(roots) == 1:
             poly = [ELEMENT_ONE] + roots
         else:
@@ -251,3 +402,14 @@ class GaloisPoly:
                 poly    = factor if poly is None else self._mul_poly(poly, factor)
 
         return GaloisPoly(self._gf, poly)
+
+    def formal_derivative(self):
+        """
+        Get the formal derivative of this polynom
+
+        Returns:
+            GaloisPoly: Formal derivative polynom
+        """
+        ans = [ak if k % 2 else ELEMENT_ZERO for k, ak in enumerate(self._coeff[::-1])]
+        ans = ans[1::]
+        return GaloisPoly(self._gf, ans[::-1])

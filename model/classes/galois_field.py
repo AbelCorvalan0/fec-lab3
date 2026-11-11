@@ -3,17 +3,17 @@ from classes.defs import *
 
 class GaloisField:
 
-    def __init__(self, m_order, primitive_poly):
+    def __init__(self, field_m, primitive_poly):
         """
         Elements and operations to work in Galois fields. The zero element always is indexed as -1
 
         Args:
-            m_order: Field order M
+            field_m: Field elements order M
             primitive_poly: Bitfield representation of primitive poly powers. Ex: X**4 + X + 1 == 0b10011
         """
-        self._m_order           = m_order
+        self._field_m           = field_m
         self._primitive_poly    = primitive_poly
-        self._cycle             = 2**self._m_order - 1
+        self._order             = 2**self._field_m - 1
         self._elements          = []
         self._generate_field()
 
@@ -31,13 +31,13 @@ class GaloisField:
         if n == ELEMENT_ZERO:
             i = ELEMENT_ZERO
         else:
-            i = abs(n) % self._cycle
+            i = abs(n) % self._order
 
         return self._elements[i], i
 
     def __str__(self):
         info = f"{'='*128}\n"
-        for e in self._elements: info += f"{e:0{self._m_order}b} -- {self._elements.index(e) if e!=0 else ELEMENT_ZERO}\n"
+        for e in self._elements: info += f"{e:0{self._field_m}b} -- {self._elements.index(e) if e!=0 else ELEMENT_ZERO}\n"
         info += f"{'='*128}\n"
 
         return info
@@ -72,7 +72,7 @@ class GaloisField:
         Returns:
             list: Poly representation of element
         """
-        return [(e>>b) & 1 for b in range(self._m_order+1)]
+        return [(e>>b) & 1 for b in range(self._field_m+1)]
 
     def _generate_field(self):
         """
@@ -80,13 +80,13 @@ class GaloisField:
         Ex: For a GF8 field, gives [1, alpha, alpha2, alpha3, alpha4, alpha5, alpha6, 0]
         """
 
-        for i in range(2**self._m_order):
+        for i in range(2**self._field_m):
             # get all primitive elements (1, alpha, alpha**2..)
-            if i < self._m_order:
+            if i < self._field_m:
                 alpha_n_final = 1<<i
             # get the m element (alpha**m)
-            elif i == self._m_order:
-                alpha_n_final = self._primitive_poly & (2**self._m_order)-1
+            elif i == self._field_m:
+                alpha_n_final = self._primitive_poly & (2**self._field_m)-1
             # get the remaining elements
             else:
                 # multiply last one by alpha (LRL), get polynomial representation, simplify
@@ -100,7 +100,7 @@ class GaloisField:
                         alpha_n_final ^= self._elements[i]
 
             if i > 0 and alpha_n_final==1:
-                # print(f"Field Closed Succesfully!, {len(self._elements)} Non-Zero Elements")
+                print(f"Field Closed Succesfully!, {len(self._elements)} Non-Zero Elements")
                 break
             else:
                 self._elements += [alpha_n_final]
@@ -144,7 +144,7 @@ class GaloisField:
             a = self._get_power(a)
             b = self._get_power(b)
 
-        i   = ELEMENT_ZERO if a==ELEMENT_ZERO or b==ELEMENT_ZERO else (a+b) % self._cycle
+        i   = ELEMENT_ZERO if a==ELEMENT_ZERO or b==ELEMENT_ZERO else (a+b) % self._order
         return self(i)
 
     def inv(self, a, id_power=True):
@@ -167,7 +167,7 @@ class GaloisField:
         if a == ELEMENT_ZERO:
             raise ZeroDivisionError
         else:
-            i   = (self._cycle - a) % self._cycle
+            i   = (self._order - a) % self._order
 
         return self(i)
 
@@ -213,7 +213,7 @@ class GaloisField:
         elif b == 0:
             i = ELEMENT_ONE
         else:
-            i = (a*abs(b)) % self._cycle
+            i = (a*abs(b)) % self._order
 
         return self(i)
 
