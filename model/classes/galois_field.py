@@ -20,7 +20,7 @@ class GaloisField:
     def __call__(self, n):
         """
         Get an element by using calling method (). Returns tuple with binary value and power
-        Ex: gf(ELEMENT_ONE), gives (1,0)
+        Ex: gf(GFE1), gives (1,0)
         
         Args:
             n: Power of element
@@ -28,8 +28,8 @@ class GaloisField:
         Returns:
             tuple: (value, power)
         """
-        if n == ELEMENT_ZERO:
-            i = ELEMENT_ZERO
+        if n == GFE0:
+            i = GFE0
         else:
             i = abs(n) % self._order
 
@@ -37,7 +37,7 @@ class GaloisField:
 
     def __str__(self):
         info = f"{'='*128}\n"
-        for e in self._elements: info += f"{e:0{self._field_m}b} -- {self._elements.index(e) if e!=0 else ELEMENT_ZERO}\n"
+        for e in self._elements: info += f"{e:0{self._field_m}b} -- {self._elements.index(e) if e!=0 else GFE0}\n"
         info += f"{'='*128}\n"
 
         return info
@@ -56,7 +56,7 @@ class GaloisField:
             int: Power of given element value
         """
         if e == 0:
-            ans = ELEMENT_ZERO
+            ans = GFE0
         else:
             ans = self._elements.index(e)
         return ans
@@ -125,7 +125,7 @@ class GaloisField:
             b = self(b)[ID_BIN]
 
         ans = a ^ b
-        i   = ELEMENT_ZERO if ans==0 else self._elements.index(ans)
+        i   = GFE0 if ans==0 else self._elements.index(ans)
         return self(i)
 
     def mul(self, a, b, id_power=True):
@@ -144,7 +144,7 @@ class GaloisField:
             a = self._get_power(a)
             b = self._get_power(b)
 
-        i   = ELEMENT_ZERO if a==ELEMENT_ZERO or b==ELEMENT_ZERO else (a+b) % self._order
+        i   = GFE0 if a==GFE0 or b==GFE0 else (a+b) % self._order
         return self(i)
 
     def inv(self, a, id_power=True):
@@ -164,7 +164,7 @@ class GaloisField:
         if not id_power:
             a = self._get_power(a)
 
-        if a == ELEMENT_ZERO:
+        if a == GFE0:
             raise ZeroDivisionError
         else:
             i   = (self._order - a) % self._order
@@ -204,14 +204,14 @@ class GaloisField:
         if not id_power:
             a = self._get_power(a)
 
-        if a == ELEMENT_ZERO and b == 0:
-            i = ELEMENT_ONE
-        elif a == ELEMENT_ZERO:
-            i = ELEMENT_ZERO
-        elif a == ELEMENT_ONE:
-            i = ELEMENT_ONE
+        if a == GFE0 and b == 0:
+            i = GFE1
+        elif a == GFE0:
+            i = GFE0
+        elif a == GFE1:
+            i = GFE1
         elif b == 0:
-            i = ELEMENT_ONE
+            i = GFE1
         else:
             i = (a*abs(b)) % self._order
 
