@@ -284,3 +284,28 @@ class GaloisField:
         if isinstance(a, int):
             a = self.do_unpack(a)
         return np.sum(a)
+
+    def to_hex(self, powers):
+        """
+        Get the hex representation of a list of elements given by
+        its powers.
+
+        Ex: In GF(256), to_hex([0, 1, ELEMENT_ZERO]), gives ['01', '02', '00']
+
+        Args:
+            powers: List of element powers (or a single power)
+
+        Returns:
+            list: Hex strings of the element values (str if a single power is given)
+        """
+
+        width = (self._field_m + 3) // 4    # digitos hex: GF(16) -> 1, GF(256) -> 2
+        if not isinstance(powers, (list, tuple, np.ndarray)):
+            return f'{self(powers)[ID_BIN]:0{width}X}'
+        return [f'{self(p)[ID_BIN]:0{width}X}' for p in powers]
+
+    def hex2dec(self, value):
+        return int(value, 16)
+
+    def dec2hex(self, value):
+        return hex(value)
