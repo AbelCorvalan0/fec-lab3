@@ -204,16 +204,25 @@ class GaloisField:
         if not id_power:
             a = self._get_power(a)
 
+        # manage negative powers
+        if b < 0:
+            a   = self.inv(a)[ID_POWER]
+            b   = abs(b)
+
+        # zero to zero equal 1 (by design)
         if a == GFE0 and b == 0:
             i = GFE1
+        # zero to anything equal zero
         elif a == GFE0:
             i = GFE0
+        # one to anything equal one
         elif a == GFE1:
             i = GFE1
+        # anything to zero equal one
         elif b == 0:
             i = GFE1
         else:
-            i = (a*abs(b)) % self._order
+            i = (a*b) % self._order
 
         return self(i)
 

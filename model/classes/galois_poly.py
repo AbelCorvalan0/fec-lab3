@@ -53,18 +53,18 @@ class GaloisPoly:
             info += "[0]"
         else:
             for k, ak in enumerate(self._coeff):
-                # ommit zero terms
+                # ommit zero terms, manage powers
                 if ak != GFE0:
-                    # manage powers
+                    info += "" if k == 0 else " + "
+                    # constant term
                     if self._degree-k == 0:
-                        info += "1" if ak == GFE1 else f"a^{ak}\n"
+                        info += "1" if ak == GFE1 else f"a{ak}\n"
+                    # linear term
                     elif self._degree-k == 1:
-                        info += "" if ak == GFE1 else f"a^{ak}*"
-                        info += f"x"
+                        info += "x" if ak == GFE1 else f"a{ak}*x"
                     else: 
-                        info += "" if ak == GFE1 else f"a^{ak}*"
-                        info += f"x^{self._degree-k}"
-                    info += "" if k == self._degree else " + "
+                        info += "" if ak == GFE1 else f"a{ak}*"
+                        info += f"x{self._degree-k}"
 
         return info
 
@@ -80,9 +80,9 @@ class GaloisPoly:
         """
         # manage zero poly
         if self._zero_poly:
-            ans = self
-        elif other._zero_poly:
             ans = other
+        elif other._zero_poly:
+            ans = self
         else:
             ans = self._add_poly(self._coeff, other._coeff)
             ans = GaloisPoly(self._gf, ans)
