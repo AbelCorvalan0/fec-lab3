@@ -414,3 +414,12 @@ class GaloisPoly:
         ans = [ak if k % 2 else GFE0 for k, ak in enumerate(self._coeff[::-1])]
         ans = ans[1::]
         return GaloisPoly(self._gf, ans[::-1])
+
+    def get_reciprocal(self):
+        """
+        Get the reciprocal poly (mirrored coefficients). Reciprocal poly has inversed roots
+
+        Returns:
+            _description_
+        """
+        return GaloisPoly(self._gf, self._coeff[::-1])
