@@ -82,18 +82,51 @@ class ReedSolomonDecoder:
         root    = [self._gf.inv(ek)[ID_POWER] for ek in err_pos]
         return root
 
-    def _get_error_mask(self, syn, Lx, loc_root):
+    def _get_erasure_locator(self, eras_idx):
+        """Gamma(x) = prod (1 + Y_l x)"""
+        Gx = GaloisPoly(self._gf, [GFE1])
+        # Y_l*x + 1  
+        eras_roots = self._build_inv_array(eras_idx)
+        Gx.poly_from_roots(eras_roots)
+        return Gx
+
+    def _build_inv_array(self, eras_idx):
+        return [self._gf.inv(p)[ID_POWER] for p in eras_idx] 
+
+    # add in array the roots locator & pos erasured
+    def _get_error_mask(self, syn, Lx, loc_root, eras_pos):
         # get evaluator poly, and locator derivative
         Sx  = GaloisPoly(self._gf, syn[::-1])
-        Zx  = Sx * Lx
-        Zx  = Zx % self.do_unpack(-1, 2*self._code_t)
-        Lxp = Lx.formal_derivative()
+      
+        if (eras_pos == []): 
+            Gx = self.do_unpack(-1, 0)
+            Tx = Sx
+            print(Gx * Sx)
+        else:
+            Gx  = self._get_erasure_locator(eras_pos)
+            print(Gx * Sx)
+            if (Tx._coeff < self.do_unpack(-1, 2*self._code_t)):    
+                print(":D1")
+                Tx = (Gx * Sx)
+                print(Gx * Sx)
+                print(":D2")
+            else:
+                print(Gx * Sx)
+                print(":D3")
+                Tx = (Gx * Sx) % self.do_unpack(-1, 2*self._code_t)
+                print(Gx * Sx)
+                print(":D4")
+
+        #Tx  = (Gx * Sx) % GaloisPoly(self._gf, [GFE1] + [GFE0]*len(syn)) #self.do_unpack(-1, 2*self._code_t) 
+        Zx  = (Tx * Lx) % GaloisPoly(self._gf, [GFE1] + [GFE0]*len(syn)) #self.do_unpack(-1, 2*self._code_t)
+        Fx  =  Lx * Gx
+        Fxp = Fx.formal_derivative()
         # print(Sx, Zx, Lx, Lxp)
 
         ek = []
-        for rk in loc_root:
+        for rk in loc_root + eras_pos:
             num = self._gf.mul(Zx(rk), self._gf.pow(rk, self._code_lo-1)[ID_POWER])[ID_POWER]
-            den = Lxp(rk)
+            den = Fxp(rk)
             ek.append(self._gf.div(num, den)[ID_POWER])
         return ek
 
@@ -104,16 +137,15 @@ class ReedSolomonDecoder:
         print(ex)
         return r + ex
     
-    def decode(self, r):
+    def decode(self, r, eras_pos):
         syn = self._get_syndromes(r)
         Lx  = self._get_locator_poly(syn)
-
         # get roots of reciprocal, error position
         Lx          = Lx.get_reciprocal()
         loc_root    = self._chien_search(Lx)
-
         # to forney we dont use reciprocal locator, evaluator changes with reciprocal locator hence formula must be adjusted
-        ek          = self._get_error_mask(syn, Lx.get_reciprocal(), [self._gf.inv(rk)[ID_POWER] for rk in loc_root])
-
+        ek          = self._get_error_mask(syn, Lx.get_reciprocal(), [self._gf.inv(rk)[ID_POWER] for rk in loc_root], eras_pos)
         r = self._error_correction(r, ek, loc_root)
+        print(syn)
+        print(loc_root)
         return r
