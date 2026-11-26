@@ -28,7 +28,7 @@ class GaloisPoly:
         """
         # manage zero poly, zero x
         if self._zero_poly:
-            ans = 0
+            ans = GFE0
         elif x == GFE0:
             ans = self._coeff[::-1][0]
         else:
